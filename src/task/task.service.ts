@@ -29,4 +29,8 @@ export class TaskService {
     return await this.TaskModel.findByIdAndRemove(id);
   }
 
+  async getStats(condition): Promise<any> {
+    return await this.TaskModel.countDocuments(condition);
+  }
+
 }

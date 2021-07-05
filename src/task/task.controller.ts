@@ -76,13 +76,28 @@ export class TaskController {
     // return
     try {
       const lists = await this.TaskService.update({_id: id, owner: req.userId}, CreateTaskDTO);
-      console.log(lists)
+      if(!lists?.nModified) return res.status(HttpStatus.BAD_REQUEST).json({message: "Invalid request"})
       return res.status(HttpStatus.OK).json({
         message: 'Post has been updated successfully!',
         lists,
       });
     } catch(err){
       console.error(`[Task]  Error while updating task: ${JSON.stringify(err)}`);
+      return res.status(500).json({
+        message: `Internal server error!`,
+      });
+    }
+  }
+
+  @Get('/mystats')
+  async getMystats(@Req() req, @Res() res, @Query('completed') completed: Boolean) {
+    try{
+      let condition = {owner: req.userId};
+      if(completed ?? 0 != 0) condition['completed'] = completed;
+      const count = await this.TaskService.getStats(condition);
+      return res.status(HttpStatus.OK).json({count})
+    }catch(err){
+      console.error(`[Task]  Error while getting stats: ${JSON.stringify(err)}`);
       return res.status(500).json({
         message: `Internal server error!`,
       });
